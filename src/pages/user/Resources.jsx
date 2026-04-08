@@ -1,6 +1,7 @@
 import { useApp } from "../../context/AppContext";
 import { getFileIcon } from "../../data/workshops";
 import { PageHeader, StatusBadge, EmptyState } from "../../components/UI";
+import { API_BASE_URL } from "../../api";
 
 export default function Resources() {
   const { workshops } = useApp();
@@ -40,7 +41,7 @@ export default function Resources() {
                   {w.materials.map((m) => (
                     <a
                       key={m}
-                      href={`http://localhost:8080/api/files/download/${m}`}
+                      href={`${API_BASE_URL}/files/download/${m}`}
                       target="_blank"
                       rel="noreferrer"
                       className="btn"

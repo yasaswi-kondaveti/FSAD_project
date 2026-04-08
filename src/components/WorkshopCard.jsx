@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { ProgressBar, StatusBadge, LevelBadge } from "./UI";
+import { API_BASE_URL } from "../api";
 
 export default function WorkshopCard({ workshop }) {
   const { currentUser, register, unregister, isRegistered } = useApp();
@@ -21,7 +22,7 @@ export default function WorkshopCard({ workshop }) {
     e.stopPropagation();
     if (!currentUser) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/workshops/${id}/certificate?userId=${currentUser.id}`);
+      const res = await fetch(`${API_BASE_URL}/workshops/${id}/certificate?userId=${currentUser.id}`);
       if (!res.ok) {
         const text = await res.text();
         console.error("Certificate error:", text);

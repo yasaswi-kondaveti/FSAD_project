@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFileIcon } from "../../data/workshops";
 import { useApp } from "../../context/AppContext";
 import { ProgressBar, StatusBadge, LevelBadge, TagRow } from "../../components/UI";
+import { API_BASE_URL } from "../../api";
 
 export default function WorkshopDetail() {
   const { workshops } = useApp();
@@ -175,7 +176,7 @@ export default function WorkshopDetail() {
                   Workshop Materials
                 </div>
                 {w.materials.map((m) => (
-                  <a href={`http://localhost:8080/api/files/download/${m}`} target="_blank" rel="noreferrer" key={m} style={{
+                  <a href={`${API_BASE_URL}/files/download/${m}`} target="_blank" rel="noreferrer" key={m} style={{
                     display: "flex", alignItems: "center", gap: 9,
                     padding: "9px 12px", textDecoration: "none",
                     background: "rgba(255,255,255,0.03)",
