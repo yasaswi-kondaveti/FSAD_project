@@ -134,6 +134,48 @@ export function AppProvider({ children }) {
     }
   };
 
+  const updateProfile = async (id, updatedData) => {
+    try {
+      const res = await api.put(`/users/${id}`, updatedData);
+      const updatedUser = res.data;
+      setCurrentUser(updatedUser);
+      setRole(updatedUser.role ? updatedUser.role.toLowerCase() : "user");
+      showToast("Profile settings saved successfully! 🎨");
+      return true;
+    } catch (err) {
+      showToast("Failed to update profile", "error");
+      return false;
+    }
+  };
+
+  const uploadMaterial = async (workshopId, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.post(`/workshops/${workshopId}/materials`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      fetchWorkshops(); // re-sync
+      showToast("File uploaded successfully! ☁️");
+      return true;
+    } catch (err) {
+      showToast("Failed to upload file.", "error");
+      return false;
+    }
+  };
+
+  const removeMaterial = async (workshopId, fileName) => {
+    try {
+      await api.delete(`/workshops/${workshopId}/materials/${fileName}`);
+      fetchWorkshops(); // re-sync
+      showToast("File removed successfully. 🗑️");
+      return true;
+    } catch (err) {
+      showToast("Failed to remove file.", "error");
+      return false;
+    }
+  };
+
   const isRegistered = (id) => registrations.includes(id);
 
   return (
@@ -141,7 +183,8 @@ export function AppProvider({ children }) {
       currentUser, login, signup, logout, authError, setAuthError,
       role, setRole,
       workshops, setWorkshops,
-      createWorkshop, updateWorkshop, deleteWorkshop,
+      createWorkshop, updateWorkshop, deleteWorkshop, updateProfile,
+      uploadMaterial, removeMaterial,
       registrations, register, unregister, isRegistered,
       toast, showToast,
     }}>

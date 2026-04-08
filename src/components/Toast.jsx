@@ -4,11 +4,11 @@ export default function Toast() {
   const { toast } = useApp();
   if (!toast) return null;
 
-  const isSuccess = toast.type !== "info";
+  const isError = toast.type === "error";
 
   return (
-    <div className={`toast ${isSuccess ? "toast-success" : "toast-info"}`}>
-      <span>{isSuccess ? "✅" : "ℹ️"}</span>
+    <div className={`toast ${isError ? "toast-error" : "toast-success"}`} style={isError ? { background: "var(--color-red)", color: "#fff" } : {}}>
+      <span>{isError ? "❌" : "✅"}</span>
       <span>{toast.message}</span>
     </div>
   );

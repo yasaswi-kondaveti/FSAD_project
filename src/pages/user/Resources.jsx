@@ -38,12 +38,15 @@ export default function Resources() {
               ) : (
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   {w.materials.map((m) => (
-                    <button
+                    <a
                       key={m}
+                      href={`http://localhost:8080/api/files/download/${m}`}
+                      target="_blank"
+                      rel="noreferrer"
                       className="btn"
                       style={{
                         display: "flex", alignItems: "center", gap: 7,
-                        padding: "8px 14px",
+                        padding: "8px 14px", textDecoration: "none",
                         background: "rgba(255,255,255,0.05)",
                         color: "var(--text-secondary)",
                         borderRadius: "var(--radius-md)",
@@ -52,9 +55,9 @@ export default function Resources() {
                       }}
                     >
                       <span>{getFileIcon(m)}</span>
-                      {m}
+                      <span style={{ maxWidth: 150, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m}</span>
                       <span style={{ color: "var(--accent-light)", marginLeft: 2 }}>↓</span>
-                    </button>
+                    </a>
                   ))}
                 </div>
               )}

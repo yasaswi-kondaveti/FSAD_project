@@ -9,9 +9,12 @@ export default function MyWorkshops() {
   const navigate = useNavigate();
 
   const myWorkshops = workshops.filter((w) => registrations.includes(w.id));
-  const live      = myWorkshops.filter((w) => w.status === "live");
-  const upcoming  = myWorkshops.filter((w) => w.status === "upcoming");
-  const past      = myWorkshops.filter((w) => w.status === "completed" || w.status === "full");
+  const live      = myWorkshops.filter((w) => (w.status || "").toLowerCase() === "live");
+  const upcoming  = myWorkshops.filter((w) => (w.status || "").toLowerCase() === "upcoming" || !w.status);
+  const past      = myWorkshops.filter((w) => {
+    const s = (w.status || "").toLowerCase();
+    return s === "completed" || s === "full";
+  });
 
   const Section = ({ title, items }) =>
     items.length === 0 ? null : (

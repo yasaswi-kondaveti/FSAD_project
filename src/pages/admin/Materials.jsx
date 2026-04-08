@@ -1,43 +1,53 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getFileIcon } from "../../data/workshops";
 import { useApp } from "../../context/AppContext";
 import { PageHeader } from "../../components/UI";
 
 export default function Materials() {
-  const { workshops } = useApp();
+  const { workshops, uploadMaterial, removeMaterial } = useApp();
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [activeWorkshopId, setActiveWorkshopId] = useState(null);
 
-  const handleUpload = () => {
+  const handleAddFileClick = (id) => {
+    setActiveWorkshopId(id);
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !activeWorkshopId) return;
+
     setUploading(true);
-    setTimeout(() => setUploading(false), 2000);
+    await uploadMaterial(activeWorkshopId, file);
+    setUploading(false);
+    
+    // reset input
+    e.target.value = null;
+    setActiveWorkshopId(null);
   };
 
   return (
     <div className="page-pad animate-fade">
       <PageHeader
         title="Training Materials"
-        subtitle="Upload and manage materials for each workshop."
+        subtitle="Upload and manage physical files linked to specific workshops."
       />
 
-      {/* Upload Zone */}
-      <div className="upload-zone mb-28" onClick={handleUpload}>
-        {uploading ? (
-          <div>
-            <div style={{ fontSize: 34, marginBottom: 12, display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</div>
-            <div style={{ color: "var(--accent-light)", fontWeight: 500 }}>Uploading file…</div>
-          </div>
-        ) : (
-          <>
-            <div style={{ fontSize: 42, marginBottom: 14 }}>☁️</div>
-            <div style={{ fontWeight: 600, color: "var(--text-secondary)", marginBottom: 6 }}>
-              Drop files here or click to upload
-            </div>
-            <div style={{ fontSize: 13, color: "var(--text-faint)" }}>
-              PDF, ZIP, MP4, IPYNB, FIGMA — max 500 MB
-            </div>
-          </>
-        )}
-      </div>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        style={{ display: "none" }} 
+        onChange={handleFileChange} 
+      />
+
+      {/* Upload Status Banner */}
+      {uploading && (
+        <div className="upload-zone mb-28" style={{ padding: "16px", borderColor: "var(--accent-light)", background: "rgba(99,102,241,0.05)" }}>
+          <div style={{ fontSize: 34, marginBottom: 12, display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</div>
+          <div style={{ color: "var(--accent-light)", fontWeight: 500 }}>Transferring secure file to backend storage…</div>
+        </div>
+      )}
 
       {/* Per-workshop materials */}
       <div className="grid-2">
@@ -64,8 +74,8 @@ export default function Materials() {
                     fontSize: 12, color: "var(--text-muted)",
                   }}>
                     <span>{getFileIcon(m)}</span>
-                    <span style={{ flex: 1 }}>{m}</span>
-                    <button className="btn" style={{
+                    <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m}</span>
+                    <button onClick={() => removeMaterial(w.id, m)} className="btn" style={{
                       background: "none", color: "var(--color-red)",
                       fontSize: 11, padding: "2px 6px",
                     }}>Remove</button>
@@ -74,14 +84,15 @@ export default function Materials() {
               )}
             </div>
 
-            <button className="btn" style={{
+            <button onClick={() => handleAddFileClick(w.id)} disabled={uploading} className="btn" style={{
               marginTop: 12, padding: "7px 14px",
               background: "rgba(99,102,241,0.1)",
               color: "var(--accent-light)",
               borderRadius: "var(--radius-md)",
               fontSize: 12, fontWeight: 500,
+              width: "100%"
             }}>
-              + Add File
+              + Drop New File
             </button>
           </div>
         ))}

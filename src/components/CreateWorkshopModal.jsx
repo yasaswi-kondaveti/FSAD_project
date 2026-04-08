@@ -107,9 +107,20 @@ export default function CreateWorkshopModal({ onClose, initialData }) {
             </div>
           </div>
 
-          <div>
-            <label className="input-label">Duration</label>
-            <input className="input" placeholder="e.g. 2h, 3.5h" value={form.duration} onChange={set("duration")} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <label className="input-label">Duration</label>
+              <input className="input" placeholder="e.g. 2h, 3.5h" value={form.duration} onChange={set("duration")} />
+            </div>
+            <div>
+              <label className="input-label">Status</label>
+              <select className="input" value={form.status || "upcoming"} onChange={set("status")}>
+                <option value="upcoming">Upcoming</option>
+                <option value="live">Live</option>
+                <option value="full">Full</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
           </div>
         </div>
 

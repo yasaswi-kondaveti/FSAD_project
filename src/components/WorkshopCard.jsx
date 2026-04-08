@@ -3,15 +3,42 @@ import { useApp } from "../context/AppContext";
 import { ProgressBar, StatusBadge, LevelBadge } from "./UI";
 
 export default function WorkshopCard({ workshop }) {
-  const { register, unregister, isRegistered } = useApp();
+  const { currentUser, register, unregister, isRegistered } = useApp();
   const navigate = useNavigate();
   const { id, title, instructor, category, date, duration, capacity, registered, status, level, thumbnail, color } = workshop;
   const reg = isRegistered(id);
 
   const handleCTA = (e) => {
     e.stopPropagation();
-    if (reg) unregister(id);
-    else if (status === "upcoming") register(id);
+    if (reg) {
+      unregister(id);
+    } else {
+      register(id);
+    }
+  };
+
+  const handleDownloadCertificate = async (e) => {
+    e.stopPropagation();
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/workshops/${id}/certificate?userId=${currentUser.id}`);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Certificate error:", text);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Certificate_${title || "Workshop"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
   };
 
   return (
@@ -66,11 +93,15 @@ export default function WorkshopCard({ workshop }) {
 
         {/* CTA */}
         <div style={{ marginTop: "auto" }}>
-          {status === "completed" ? (
-            <button className="btn btn-success" style={{ width: "100%", padding: "9px" }}>
-              View Recording
+          {(status || "").toLowerCase() === "completed" && reg ? (
+            <button className="btn btn-success" onClick={handleDownloadCertificate} style={{ width: "100%", padding: "9px" }}>
+              📥 Download Certificate
             </button>
-          ) : status === "full" && !reg ? (
+          ) : (status || "").toLowerCase() === "completed" ? (
+             <button className="btn" disabled style={{ width: "100%", padding: "9px" }}>
+               Session Concluded
+             </button>
+          ) : (status || "").toLowerCase() === "full" && !reg ? (
             <button className="btn" disabled style={{
               width: "100%", padding: "9px",
               background: "rgba(255,255,255,0.04)", color: "var(--text-faint)",

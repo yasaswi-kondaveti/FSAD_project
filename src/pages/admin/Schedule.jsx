@@ -11,7 +11,11 @@ export default function Schedule() {
   const openCreate = () => { setEditingWorkshop(null); setShowModal(true); };
   const openEdit = (w) => { setEditingWorkshop(w); setShowModal(true); };
 
-  const sorted = [...workshops].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...workshops].sort((a, b) => {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return new Date(a.date) - new Date(b.date);
+  });
 
   return (
     <div className="page-pad animate-fade">
@@ -27,7 +31,8 @@ export default function Schedule() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {sorted.map((w) => {
-          const [month, day] = w.date.split(" ");
+          const dateStr = w.date || "TBD ";
+          const [month, day] = dateStr.split(" ");
           return (
             <div
               key={w.id}

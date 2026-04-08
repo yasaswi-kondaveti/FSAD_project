@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import SettingsModal from "./SettingsModal";
 
 const USER_NAV = [
   { path: "/",           label: "Dashboard",        icon: "🏠" },
@@ -18,11 +20,7 @@ const ADMIN_NAV = [
 export default function Sidebar() {
   const { role, setRole, currentUser, logout } = useApp();
   const navigate = useNavigate();
-
-  const switchRole = (newRole) => {
-    setRole(newRole);
-    navigate(newRole === "admin" ? "/admin" : "/");
-  };
+  const [showSettings, setShowSettings] = useState(false);
 
   const navItems = role === "admin" ? ADMIN_NAV : USER_NAV;
 
@@ -56,28 +54,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Role Toggle */}
-      <div style={{ padding: "12px 12px 6px" }}>
-        <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 8, padding: 3, display: "flex", gap: 2 }}>
-          {["user", "admin"].map((r) => (
-            <button
-              key={r}
-              onClick={() => switchRole(r)}
-              className="btn"
-              style={{
-                flex: 1, padding: "7px",
-                borderRadius: 6,
-                fontSize: 12, fontWeight: 600,
-                background: role === r ? "#4F46E5" : "transparent",
-                color: role === r ? "#fff" : "var(--text-subtle)",
-                textTransform: "capitalize",
-              }}
-            >
-              {r === "admin" ? "⚙ Admin" : "👤 User"}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Navigation */}
       <nav style={{ padding: "8px 8px", flex: 1 }}>
@@ -121,6 +98,20 @@ export default function Sidebar() {
           </div>
         </div>
         <button
+          onClick={() => setShowSettings(true)}
+          className="btn"
+          style={{
+            width: "100%", padding: "8px", marginBottom: "8px",
+            background: "transparent",
+            color: "var(--text-secondary)",
+            borderRadius: "var(--radius-md)",
+            fontSize: 12, fontWeight: 500,
+            border: "1px solid var(--border)",
+          }}
+        >
+          ⚙️ Profile Settings
+        </button>
+        <button
           onClick={logout}
           className="btn"
           style={{
@@ -135,6 +126,8 @@ export default function Sidebar() {
           Sign Out
         </button>
       </div>
+      
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </aside>
   );
 }

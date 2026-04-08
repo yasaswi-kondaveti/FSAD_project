@@ -175,17 +175,17 @@ export default function WorkshopDetail() {
                   Workshop Materials
                 </div>
                 {w.materials.map((m) => (
-                  <div key={m} style={{
+                  <a href={`http://localhost:8080/api/files/download/${m}`} target="_blank" rel="noreferrer" key={m} style={{
                     display: "flex", alignItems: "center", gap: 9,
-                    padding: "9px 12px",
+                    padding: "9px 12px", textDecoration: "none",
                     background: "rgba(255,255,255,0.03)",
                     borderRadius: "var(--radius-md)",
                     marginBottom: 7, fontSize: 13, color: "var(--text-muted)",
                   }}>
                     <span>{getFileIcon(m)}</span>
-                    <span style={{ flex: 1 }}>{m}</span>
+                    <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m}</span>
                     <span style={{ color: "var(--accent-light)", cursor: "pointer" }}>↓</span>
-                  </div>
+                  </a>
                 ))}
               </div>
             )}

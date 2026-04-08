@@ -13,9 +13,10 @@ export default function BrowseWorkshops() {
   const filtered = workshops.filter((w) => {
     const matchCat    = category === "All" || w.category === category;
     const matchStatus = status   === "All" || w.status   === status;
-    const matchSearch = w.title.toLowerCase().includes(search.toLowerCase())
-                     || w.instructor.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchStatus && matchSearch;
+    const searchLow   = search.toLowerCase();
+    const titleMatch  = w.title ? w.title.toLowerCase().includes(searchLow) : false;
+    const instMatch   = w.instructor ? w.instructor.toLowerCase().includes(searchLow) : false;
+    return matchCat && matchStatus && (titleMatch || instMatch);
   });
 
   return (
