@@ -41,7 +41,8 @@ export function AppProvider({ children }) {
       showToast(`Welcome back, ${account.name.split(" ")[0]}! 👋`);
       return true;
     } catch (err) {
-      setAuthError("Invalid email or password.");
+      const msg = err.response?.data?.message || err.message || "Login failed";
+      setAuthError(msg.includes("Invalid credentials") ? "Invalid email or password." : msg);
       return false;
     }
   };
@@ -61,7 +62,8 @@ export function AppProvider({ children }) {
       showToast(`Account created! Welcome to WorkshopHub, ${name.split(" ")[0]}! 🎉`);
       return true;
     } catch (err) {
-      setAuthError("An account with this email already exists.");
+      const msg = err.response?.data?.message || err.message || "Signup failed";
+      setAuthError(msg.includes("Email already in use") ? "An account with this email already exists." : msg);
       return false;
     }
   };
