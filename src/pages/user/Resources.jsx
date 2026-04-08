@@ -1,8 +1,9 @@
 import { useApp } from "../../context/AppContext";
-import { workshops, getFileIcon } from "../../data/workshops";
+import { getFileIcon } from "../../data/workshops";
 import { PageHeader, StatusBadge, EmptyState } from "../../components/UI";
 
 export default function Resources() {
+  const { workshops } = useApp();
   const { registrations } = useApp();
   const myWorkshops = workshops.filter((w) => registrations.includes(w.id));
 

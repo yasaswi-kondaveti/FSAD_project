@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { workshops, ADMIN_STATS, STATUS_COLORS, STATUS_LABELS } from "../../data/workshops";
+import { ADMIN_STATS, STATUS_COLORS, STATUS_LABELS } from "../../data/workshops";
+import { useApp } from "../../context/AppContext";
 import { PageHeader, StatCard, ProgressBar, StatusBadge } from "../../components/UI";
 import CreateWorkshopModal from "../../components/CreateWorkshopModal";
 
 export default function AdminDashboard() {
+  const { workshops, deleteWorkshop } = useApp();
   const [showModal, setShowModal] = useState(false);
+  const [editingWorkshop, setEditingWorkshop] = useState(null);
+
+  const openCreate = () => { setEditingWorkshop(null); setShowModal(true); };
+  const openEdit = (w) => { setEditingWorkshop(w); setShowModal(true); };
 
   return (
     <div className="page-pad animate-fade">
@@ -12,7 +18,7 @@ export default function AdminDashboard() {
         title="Admin Overview"
         subtitle="Wednesday, February 18, 2026"
         action={
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={openCreate}>
             + New Workshop
           </button>
         }
@@ -69,8 +75,8 @@ export default function AdminDashboard() {
                 <td><StatusBadge status={w.status} /></td>
                 <td>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button className="btn btn-ghost">Edit</button>
-                    <button className="btn" style={{
+                    <button className="btn btn-ghost" onClick={() => openEdit(w)}>Edit</button>
+                    <button className="btn" onClick={() => deleteWorkshop(w.id)} style={{
                       padding: "6px 12px", borderRadius: "var(--radius-sm)",
                       background: "rgba(239,68,68,0.08)", color: "var(--color-red)",
                       fontSize: 12,
@@ -83,7 +89,7 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      {showModal && <CreateWorkshopModal onClose={() => setShowModal(false)} />}
+      {showModal && <CreateWorkshopModal onClose={() => setShowModal(false)} initialData={editingWorkshop} />}
     </div>
   );
 }

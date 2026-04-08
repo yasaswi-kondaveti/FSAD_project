@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
+import api from "../../api";
+
 
 export default function Login() {
   const { login, authError, setAuthError } = useApp();
@@ -17,15 +19,21 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) {
-      return;
-    }
+
+    if (!form.email || !form.password) return;
+
     setLoading(true);
-    // Simulate network latency
-    await new Promise((r) => setTimeout(r, 700));
-    const ok = login(form.email, form.password);
+
+    const success = await login(form.email, form.password);
+    
+    if (success) {
+      if (form.email.includes("admin")) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }
     setLoading(false);
-    if (ok) navigate("/");
   };
 
   const fillDemo = (type) => {

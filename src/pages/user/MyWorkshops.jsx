@@ -1,10 +1,10 @@
 import { useApp } from "../../context/AppContext";
-import { workshops } from "../../data/workshops";
 import WorkshopCard from "../../components/WorkshopCard";
 import { PageHeader, EmptyState } from "../../components/UI";
 import { useNavigate } from "react-router-dom";
 
 export default function MyWorkshops() {
+  const { workshops } = useApp();
   const { registrations } = useApp();
   const navigate = useNavigate();
 

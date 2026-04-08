@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { workshops, CATEGORIES, STATUSES } from "../../data/workshops";
+import { CATEGORIES, STATUSES } from "../../data/workshops";
+import { useApp } from "../../context/AppContext";
 import WorkshopCard from "../../components/WorkshopCard";
 import { PageHeader, EmptyState } from "../../components/UI";
 
 export default function BrowseWorkshops() {
+  const { workshops } = useApp();
   const [search, setSearch]       = useState("");
   const [category, setCategory]   = useState("All");
   const [status, setStatus]       = useState("All");

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
+import api from "../../api";
 
 const INTERESTS = ["Development", "Design", "Data Science", "Business", "Marketing", "Leadership"];
 
@@ -42,12 +43,18 @@ export default function Signup() {
     setStep(2);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.name || !form.email || !form.password) return;
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    const ok = signup(form.name.trim(), form.email.trim(), form.password);
+    const success = await signup(form.name, form.email, form.password);
+    
+    if (success) {
+      navigate("/");
+    }
     setLoading(false);
-    if (ok) navigate("/");
   };
 
   const strength = getPasswordStrength(form.password);
@@ -142,7 +149,10 @@ export default function Signup() {
                 </p>
               </div>
 
-              <form onSubmit={handleStep1} style={{ display: "flex", flexDirection: "column", gap: 15 }}>
+              <form 
+  onSubmit={step === 1 ? handleStep1 : handleSubmit}
+  style={{ display: "flex", flexDirection: "column", gap: 15 }}
+>
                 <div>
                   <label className="input-label">Full Name</label>
                   <input className="input" placeholder="Jane Smith" value={form.name} onChange={set("name")} required />

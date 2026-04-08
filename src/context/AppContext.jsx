@@ -1,105 +1,137 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "../api";
 
 const AppContext = createContext(null);
 
-const INITIAL_REGISTRATIONS = [1, 3, 6];
-
-// ─── Demo accounts (simulates a backend) ─────────────────────────────────────
-const DEMO_ACCOUNTS = [
-  {
-    id: 1,
-    name: "Jamie Lee",
-    email: "user@workshophub.com",
-    password: "password123",
-    role: "user",
-    avatar: "J",
-    avatarGradient: "linear-gradient(135deg, #818CF8, #06B6D4)",
-    joinedDate: "January 2026",
-  },
-  {
-    id: 2,
-    name: "Alex Morgan",
-    email: "admin@workshophub.com",
-    password: "admin123",
-    role: "admin",
-    avatar: "A",
-    avatarGradient: "linear-gradient(135deg, #F59E0B, #EF4444)",
-    joinedDate: "December 2025",
-  },
-];
-
 export function AppProvider({ children }) {
-  const [currentUser, setCurrentUser]     = useState(null);            // logged-in user object
+  const [currentUser, setCurrentUser]     = useState(null);
   const [role, setRole]                   = useState("user");
-  const [registrations, setRegistrations] = useState(INITIAL_REGISTRATIONS);
+  const [registrations, setRegistrations] = useState([]);
+  const [workshops, setWorkshops]         = useState([]);
   const [toast, setToast]                 = useState(null);
   const [authError, setAuthError]         = useState(null);
 
-  // ── Toast ─────────────────────────────────────────────────────────────────
+  // Fetch workshops on mount
+  useEffect(() => {
+    fetchWorkshops();
+  }, []);
+
+  const fetchWorkshops = async () => {
+    try {
+      const res = await api.get("/workshops");
+      setWorkshops(res.data);
+    } catch (err) {
+      console.error("Failed to load workshops", err);
+    }
+  };
+
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3200);
   };
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  const login = (email, password) => {
+  const login = async (email, password) => {
     setAuthError(null);
-    const account = DEMO_ACCOUNTS.find(
-      (a) => a.email.toLowerCase() === email.toLowerCase() && a.password === password
-    );
-    if (!account) {
-      setAuthError("Invalid email or password. Try the demo credentials below.");
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const account = res.data;
+      setCurrentUser(account);
+      setRole(account.role ? account.role.toLowerCase() : "user");
+      setRegistrations(account.registeredWorkshops ? account.registeredWorkshops.map(w => w.id) : []);
+      showToast(`Welcome back, ${account.name.split(" ")[0]}! 👋`);
+      return true;
+    } catch (err) {
+      setAuthError("Invalid email or password.");
       return false;
     }
-    setCurrentUser(account);
-    setRole(account.role);
-    showToast(`Welcome back, ${account.name.split(" ")[0]}! 👋`);
-    return true;
   };
 
-  const signup = (name, email, password) => {
+  const signup = async (name, email, password) => {
     setAuthError(null);
-    const exists = DEMO_ACCOUNTS.find((a) => a.email.toLowerCase() === email.toLowerCase());
-    if (exists) {
-      setAuthError("An account with this email already exists.");
-      return false;
-    }
     if (password.length < 6) {
       setAuthError("Password must be at least 6 characters.");
       return false;
     }
-    // Simulate account creation — in production this hits your API
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      role: "user",
-      avatar: name.charAt(0).toUpperCase(),
-      avatarGradient: "linear-gradient(135deg, #818CF8, #06B6D4)",
-      joinedDate: "February 2026",
-    };
-    setCurrentUser(newUser);
-    setRole("user");
-    showToast(`Account created! Welcome to WorkshopHub, ${name.split(" ")[0]}! 🎉`);
-    return true;
+    try {
+      const res = await api.post("/auth/signup", { name, email, password });
+      const account = res.data;
+      setCurrentUser(account);
+      setRole(account.role ? account.role.toLowerCase() : "user");
+      setRegistrations([]);
+      showToast(`Account created! Welcome to WorkshopHub, ${name.split(" ")[0]}! 🎉`);
+      return true;
+    } catch (err) {
+      setAuthError("An account with this email already exists.");
+      return false;
+    }
   };
 
   const logout = () => {
     setCurrentUser(null);
     setRole("user");
-    setRegistrations(INITIAL_REGISTRATIONS);
+    setRegistrations([]);
     showToast("You've been signed out.", "info");
   };
 
-  // ── Workshop actions ───────────────────────────────────────────────────────
-  const register = (id) => {
-    setRegistrations((prev) => [...prev, id]);
-    showToast("Successfully registered for workshop! 🎉");
+  const register = async (id) => {
+    if (!currentUser) return;
+    try {
+      const res = await api.post(`/workshops/${id}/register?userId=${currentUser.id}`);
+      setRegistrations(res.data.registeredWorkshops.map(w => w.id));
+      showToast("Successfully registered for workshop! 🎉");
+      fetchWorkshops(); // sync counts
+    } catch (err) {
+      showToast("Error registering", "error");
+    }
   };
 
-  const unregister = (id) => {
-    setRegistrations((prev) => prev.filter((r) => r !== id));
-    showToast("Registration cancelled.", "info");
+  const unregister = async (id) => {
+    if (!currentUser) return;
+    try {
+      const res = await api.delete(`/workshops/${id}/register?userId=${currentUser.id}`);
+      setRegistrations(res.data.registeredWorkshops.map(w => w.id));
+      showToast("Registration cancelled.", "info");
+      fetchWorkshops(); // sync counts
+    } catch (err) {
+      showToast("Error cancelling registration", "error");
+    }
+  };
+
+  const createWorkshop = async (workshopData) => {
+    try {
+      await api.post("/workshops", workshopData);
+      showToast("Workshop created successfully! 🚀");
+      fetchWorkshops();
+      return true;
+    } catch (err) {
+      showToast("Failed to create workshop", "error");
+      return false;
+    }
+  };
+
+  const updateWorkshop = async (id, workshopData) => {
+    try {
+      await api.put(`/workshops/${id}`, workshopData);
+      showToast("Workshop updated successfully! ✨");
+      fetchWorkshops();
+      return true;
+    } catch (err) {
+      showToast("Failed to update workshop", "error");
+      return false;
+    }
+  };
+
+  const deleteWorkshop = async (id) => {
+    if(!window.confirm("Are you sure you want to delete this workshop?")) return false;
+    try {
+      await api.delete(`/workshops/${id}`);
+      showToast("Workshop deleted.", "info");
+      fetchWorkshops();
+      return true;
+    } catch (err) {
+      showToast("Failed to delete workshop", "error");
+      return false;
+    }
   };
 
   const isRegistered = (id) => registrations.includes(id);
@@ -108,6 +140,8 @@ export function AppProvider({ children }) {
     <AppContext.Provider value={{
       currentUser, login, signup, logout, authError, setAuthError,
       role, setRole,
+      workshops, setWorkshops,
+      createWorkshop, updateWorkshop, deleteWorkshop,
       registrations, register, unregister, isRegistered,
       toast, showToast,
     }}>
@@ -121,3 +155,4 @@ export const useApp = () => {
   if (!ctx) throw new Error("useApp must be used inside AppProvider");
   return ctx;
 };
+

@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { workshops, getFileIcon } from "../../data/workshops";
+import { getFileIcon } from "../../data/workshops";
 import { useApp } from "../../context/AppContext";
 import { ProgressBar, StatusBadge, LevelBadge, TagRow } from "../../components/UI";
 
 export default function WorkshopDetail() {
+  const { workshops } = useApp();
   const { id } = useParams();
   const navigate = useNavigate();
   const { register, unregister, isRegistered } = useApp();

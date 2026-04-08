@@ -8,23 +8,39 @@ const DEFAULT_FORM = {
   capacity: 20, duration: "2h", description: "",
 };
 
-export default function CreateWorkshopModal({ onClose }) {
-  const { showToast } = useApp();
-  const [form, setForm] = useState(DEFAULT_FORM);
+export default function CreateWorkshopModal({ onClose, initialData }) {
+  const { createWorkshop, updateWorkshop, showToast } = useApp();
+  const [form, setForm] = useState(initialData || DEFAULT_FORM);
 
   const set = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
 
-  const handleSubmit = () => {
-    if (!form.title.trim() || !form.instructor.trim()) {
+  const handleSubmit = async () => {
+    if (!form.title.trim() || !form.instructor.trim() || !form.date.trim()) {
       showToast("Please fill in all required fields.", "info");
       return;
     }
-    showToast("Workshop created successfully! 🚀");
-    onClose();
+    
+    // Add default thumbnail and color if creating a new workshop
+    const payload = {
+        ...form,
+        thumbnail: form.thumbnail || "📦",
+        color: form.color || "#8B5CF6",
+        status: form.status || "Upcoming",
+        registered: form.registered || 0
+    };
+
+    let success;
+    if (initialData && initialData.id) {
+        success = await updateWorkshop(initialData.id, payload);
+    } else {
+        success = await createWorkshop(payload);
+    }
+
+    if (success) onClose();
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} style={{zIndex: 999}}>
       <div
         onClick={(e) => e.stopPropagation()}
         className="animate-fade"
@@ -41,7 +57,7 @@ export default function CreateWorkshopModal({ onClose }) {
         {/* Header */}
         <div className="flex-between mb-24">
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, color: "#fff" }}>
-            Create New Workshop
+            {initialData ? "Edit Workshop" : "Create New Workshop"}
           </h2>
           <button className="btn btn-ghost" onClick={onClose} style={{ fontSize: 18, padding: "5px 10px" }}>✕</button>
         </div>
@@ -103,7 +119,7 @@ export default function CreateWorkshopModal({ onClose }) {
             Cancel
           </button>
           <button className="btn btn-primary" onClick={handleSubmit} style={{ flex: 2, padding: "12px", borderRadius: "var(--radius-md)", fontSize: 14 }}>
-            Create Workshop →
+            {initialData ? "Save Changes" : "Create Workshop"} →
           </button>
         </div>
       </div>

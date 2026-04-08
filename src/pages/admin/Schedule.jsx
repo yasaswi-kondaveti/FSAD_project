@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { workshops } from "../../data/workshops";
+import { useApp } from "../../context/AppContext";
 import { PageHeader, StatusBadge } from "../../components/UI";
 import CreateWorkshopModal from "../../components/CreateWorkshopModal";
 
 export default function Schedule() {
+  const { workshops, deleteWorkshop } = useApp();
   const [showModal, setShowModal] = useState(false);
+  const [editingWorkshop, setEditingWorkshop] = useState(null);
+
+  const openCreate = () => { setEditingWorkshop(null); setShowModal(true); };
+  const openEdit = (w) => { setEditingWorkshop(w); setShowModal(true); };
 
   const sorted = [...workshops].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -14,7 +19,7 @@ export default function Schedule() {
         title="Workshop Schedule"
         subtitle={`${workshops.length} sessions scheduled`}
         action={
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={openCreate}>
             + Add Workshop
           </button>
         }
@@ -57,14 +62,15 @@ export default function Schedule() {
 
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <StatusBadge status={w.status} />
-                <button className="btn btn-ghost">Edit</button>
+                <button className="btn btn-ghost" onClick={() => openEdit(w)}>Edit</button>
+                <button className="btn btn-ghost" onClick={() => deleteWorkshop(w.id)} style={{ color: "var(--color-red)" }}>Delete</button>
               </div>
             </div>
           );
         })}
       </div>
 
-      {showModal && <CreateWorkshopModal onClose={() => setShowModal(false)} />}
+      {showModal && <CreateWorkshopModal onClose={() => setShowModal(false)} initialData={editingWorkshop} />}
     </div>
   );
 }

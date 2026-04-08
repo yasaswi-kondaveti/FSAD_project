@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
-import { workshops } from "../../data/workshops";
 import { StatCard, SectionHeader } from "../../components/UI";
 
 export default function UserDashboard() {
+  const { workshops } = useApp();
   const { registrations, register, isRegistered } = useApp();
   const navigate = useNavigate();
 

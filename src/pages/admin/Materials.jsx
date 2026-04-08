@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { workshops, getFileIcon } from "../../data/workshops";
+import { getFileIcon } from "../../data/workshops";
+import { useApp } from "../../context/AppContext";
 import { PageHeader } from "../../components/UI";
 
 export default function Materials() {
+  const { workshops } = useApp();
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = () => {

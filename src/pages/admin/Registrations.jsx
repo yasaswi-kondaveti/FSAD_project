@@ -1,7 +1,8 @@
-import { workshops } from "../../data/workshops";
+import { useApp } from "../../context/AppContext";
 import { PageHeader, ProgressBar, StatusBadge } from "../../components/UI";
 
 export default function Registrations() {
+  const { workshops } = useApp();
   const total = workshops.reduce((sum, w) => sum + w.registered, 0);
 
   return (
